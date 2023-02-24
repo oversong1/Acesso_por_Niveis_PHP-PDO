@@ -1,0 +1,142 @@
+Passo 7: Página de Administração
+
+Crie um arquivo chamado "admin.php" para exibir a página de administração, onde o usuário com nível de acesso "admin" poderá alterar o nível de acesso de outros usuários e adicionar imagens de perfil:
+
+Observe que a página exibe uma tabela com todos os usuários cadastrados no sistema e permite ao usuário com nível de acesso "admin" atualizar o nível de acesso dos outros usuários ou excluir usuários (exceto a si próprio). Também é possível atualizar a imagem de perfil do usuário logado na página.
+
+<?php
+session_start();
+
+require_once 'config.php';
+
+// Verifica se o usuário está logado e é admin
+if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['nivel_acesso'] != 'admin') {
+    header('Location: login.php');
+    exit();
+}
+
+$mensagem = '';
+
+// Verifica se o formulário de mudança de nível de acesso foi enviado
+if (isset($_POST['usuario_id'], $_POST['nivel_acesso'])) {
+    $usuario_id = $_POST['usuario_id'];
+    $nivel_acesso = $_POST['nivel_acesso'];
+
+    // Atualiza o nível de acesso do usuário no banco de dados
+    $stmt = $pdo->prepare('UPDATE usuarios SET nivel_acesso = :nivel_acesso WHERE id = :id');
+    $stmt->execute([':nivel_acesso' => $nivel_acesso, ':id' => $usuario_id]);
+
+    $mensagem = 'Nível de acesso do usuário atualizado com sucesso.';
+}
+
+// Verifica se o formulário de upload de imagem foi enviado
+if (isset($_FILES['imagem'])) {
+    $imagem = $_FILES['imagem'];
+
+    // Verifica se o arquivo enviado é uma imagem válida
+    if ($imagem['error'] == UPLOAD_ERR_OK && preg_match('/^image\//', $imagem['type'])) {
+        $extensao = pathinfo($imagem['name'], PATHINFO_EXTENSION);
+        $nome_imagem = uniqid() . '.' . $extensao;
+        $caminho_imagem = 'uploads/' . $nome_imagem;
+
+        // Move o arquivo para a pasta "uploads"
+        move_uploaded_file($imagem['tmp_name'], $caminho_imagem);
+
+        // Atualiza a imagem do usuário no banco de dados
+        $stmt = $pdo->prepare('UPDATE usuarios SET imagem = :imagem WHERE id = :id');
+        $stmt->execute([':imagem' => $caminho_imagem, ':id' => $_SESSION['usuario']['id']]);
+
+        $mensagem = 'Imagem de perfil atualizada com sucesso.';
+    } else {
+        $mensagem = 'Erro ao enviar imagem.';
+    }
+}
+
+// Busca todos os usuários do banco de dados
+$stmt = $pdo->query('SELECT * FROM usuarios');
+$usuarios = $stmt->fetchAll();
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Página de Administração</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .mensagem {
+            color: green;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .erro {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Página de Administração</h1>
+    <p>Bem-vindo, <?php echo $_SESSION['usuario']['nome'] . ' ' . $_SESSION['usuario']['sobrenome']; ?>!</p>
+    <?php if ($mensagem): ?>
+        <p class="mensagem"><?php echo $mensagem; ?></p>
+    <?php endif; ?>
+    <form method="post" enctype="multipart/form-data">
+        <label>Imagem deperfil:</label><br>
+<input type="file" name="imagem"><br>
+<input type="submit" value="Enviar">
+</form>
+<h2>Usuários</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Nome</th>
+<th>Sobrenome</th>
+<th>E-mail</th>
+<th>Nível de Acesso</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<?php foreach ($usuarios as $usuario): ?>
+<tr>
+<td><?php echo $usuario['id']; ?></td>
+<td><?php echo $usuario['nome']; ?></td>
+<td><?php echo $usuario['sobrenome']; ?></td>
+<td><?php echo $usuario['email']; ?></td>
+<td>
+<form method="post">
+<input type="hidden" name="usuario_id" value="<?php echo $usuario['id']; ?>">
+<select name="nivel_acesso">
+<option value="normal" <?php echo $usuario['nivel_acesso'] == 'normal' ? 'selected' : ''; ?>>Normal</option>
+<option value="admin" <?php echo $usuario['nivel_acesso'] == 'admin' ? 'selected' : ''; ?>>Admin</option>
+</select>
+<input type="submit" value="Atualizar">
+</form>
+</td>
+<td>
+<?php if ($usuario['id'] != $_SESSION['usuario']['id']): ?>
+<a href="excluir.php?id=<?php echo $usuario['id']; ?>">Excluir</a>
+<?php endif; ?>
+</td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+<p><a href="logout.php">Sair</a></p>
+
+</body>
+</html>

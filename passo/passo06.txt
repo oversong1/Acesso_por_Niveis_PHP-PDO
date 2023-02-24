@@ -1,0 +1,67 @@
+Passo 6: Página Inicial
+
+Crie um arquivo chamado "index.php" para exibir o menu de acordo com o nível de acesso do usuário:
+
+<?php
+session_start();
+
+require_once 'config.php';
+
+// Verifica se o usuário está logado
+if (!isset($_SESSION['usuario'])) {
+    header('Location: login.php');
+    exit();
+}
+
+$usuario = $_SESSION['usuario'];
+
+// Verifica o nível de acesso do usuário
+if ($usuario['nivel_acesso'] == 'normal') {
+    $menu = '<li><a href="#">Menu 1</a></li>
+             <li><a href="#">Menu 2</a></li>
+             <li><a href="#">Menu 3</a></li>';
+} else {
+    $menu = '<li><a href="#">Menu 1</a></li>
+             <li><a href="#">Menu 2</a></li>
+             <li><a href="#">Menu 3</a></li>
+             <li><a href="admin.php">Admin</a></li>';
+}
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Página Inicial</title>
+    <style>
+        nav {
+            background-color: #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav li {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        nav a {
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <?php echo $menu; ?>
+            <li><a href="logout.php">Sair</a></li>
+        </ul>
+    </nav>
+    <h1>Bem-vindo, <?php echo $usuario['nome'] . ' ' . $usuario['sobrenome']; ?>!</h1>
+</body>
+</html>

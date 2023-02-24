@@ -1,0 +1,23 @@
+Passo 3: Funções de Acesso ao Banco de Dados
+
+Crie um arquivo de funções chamado "functions.php" para definir as funções de acesso ao banco de dados:
+
+<?php
+
+// Função para inserir um novo usuário na tabela "usuarios"
+function inserirUsuario($nome, $sobrenome, $email, $senha, $nivel_acesso) {
+    global $pdo;
+
+    $stmt = $pdo->prepare("INSERT INTO usuarios (nome, sobrenome, email, senha, nivel_acesso) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$nome, $sobrenome, $email, password_hash($senha, PASSWORD_DEFAULT), $nivel_acesso]);
+}
+
+// Função para atualizar os dados de um usuário na tabela "usuarios"
+function atualizarUsuario($id, $nome, $sobrenome, $email, $senha, $nivel_acesso) {
+    global $pdo;
+
+    $stmt = $pdo->prepare("UPDATE usuarios SET nome = ?, sobrenome = ?, email = ?, senha = ?, nivel_acesso = ? WHERE id = ?");
+    $stmt->execute([$nome, $sobrenome, $email, password_hash($senha, PASSWORD_DEFAULT), $nivel_acesso, $id]);
+}
+
+// Função para excluir um usuário da tabela "usuarios

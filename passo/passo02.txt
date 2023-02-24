@@ -1,0 +1,19 @@
+Passo 2: Conexão com o Banco de Dados
+
+Crie um arquivo de configuração chamado "config.php" para armazenar as informações de conexão com o banco de dados:
+
+<?php
+
+// Informações de conexão com o banco de dados
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'meu_banco');
+define('DB_USER', 'meu_usuario');
+define('DB_PASS', 'minha_senha');
+
+// Conexão com o banco de dados usando PDO
+try {
+    $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME, DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    die("Erro ao conectar com o banco de dados: " . $e->getMessage());
+}

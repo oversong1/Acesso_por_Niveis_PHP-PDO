@@ -1,0 +1,32 @@
+<?php
+session_start();
+
+require_once 'config.php';
+
+// Verifica se o usuário está logado e é admin
+if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['nivel_acesso'] != 'admin') {
+    header('Location: login.php');
+    exit();
+}
+
+// Verifica se o ID do usuário a ser excluído foi informado na URL
+if (!isset($_GET['id'])) {
+    header('Location: admin.php');
+    exit();
+}
+
+$usuario_id = $_GET['id'];
+
+// Verifica se o usuário a ser excluído é o próprio usuário logado
+if ($usuario_id == $_SESSION['usuario']['id']) {
+    header('Location: admin.php');
+    exit();
+}
+
+// Exclui o usuário do banco de dados
+$stmt = $pdo->prepare('DELETE FROM usuarios WHERE id = :id');
+$stmt->execute([':id' => $usuario_id]);
+
+// Redireciona de volta para a página de administração
+header('Location: admin.php');
+exit();

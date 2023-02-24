@@ -1,0 +1,15 @@
+Passo 1: Criação do Banco de Dados
+
+Crie um banco de dados MySQL com duas tabelas: "login" e "usuarios". A tabela "login" terá as seguintes colunas: "id", "username" e "senha". A tabela "usuarios" terá as seguintes colunas: "id", "nome", "sobrenome", "email", "senha", "imagem" e "nivel_acesso". Use o seguinte código SQL para criar as tabelas:
+
+
+CREATE TABLE `usuarios` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nome` varchar(50) NOT NULL,
+  `sobrenome` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `senha` varchar(255) NOT NULL,
+  `imagem` varchar(255) DEFAULT NULL,
+  `nivel_acesso` enum('normal','admin') NOT NULL DEFAULT 'normal',
+  PRIMARY KEY (`id`)
+);
